@@ -1,0 +1,29 @@
+diff --git a/types/core.d.ts b/types/core.d.ts
+--- a/types/core.d.ts
++++ b/types/core.d.ts
+@@ -41 +41 @@
+-  rootNode: HTMLElement,
++  rootNode: unknown,
+diff --git a/types/full.d.ts b/types/full.d.ts
+--- a/types/full.d.ts
++++ b/types/full.d.ts
+@@ -7 +7 @@
+-} from './core';
++} from './core.js';
+@@ -16 +16 @@
+-} from './core';
++} from './core.js';
+@@ -18,2 +18,2 @@
+-import type { ConverterFunction, ConverterOptions } from './core';
+-import * as Locale from './preset';
++import type { ConverterFunction, ConverterOptions } from './core.js';
++import * as Locale from './preset.js';
+@@ -26 +26 @@
+-} from './core';
++} from './core.js';
+diff --git a/types/preset.d.ts b/types/preset.d.ts
+--- a/types/preset.d.ts
++++ b/types/preset.d.ts
+@@ -1 +1 @@
+-import type { DictGroup, DictLike } from './core';
++import type { DictGroup, DictLike } from './core.js';

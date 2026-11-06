@@ -1,0 +1,9 @@
+{
+  "name": "@relative-motion/pipeline",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "opencc-js": "1.4.2",
+    "pinyin-pro": "3.29.5"
+  }
+}

@@ -1,0 +1,52 @@
+# Tests, builds and publishes the site to GitHub Pages on every push to main, or when run by hand
+# after a new catalogue snapshot is uploaded. The catalogue is not built here: the maintainer
+# exports it locally and uploads it to the replaceable `catalog-snapshot` release (it carries TMDb
+# data, so it is kept out of Git).
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - name: Download the catalogue snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download catalog-snapshot --repo "$GITHUB_REPOSITORY" --pattern '*.json' --dir web/public/data
+      - id: pages
+        uses: actions/configure-pages@v5
+      - run: pnpm -C web exec vite build --base "${{ steps.pages.outputs.base_path }}/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

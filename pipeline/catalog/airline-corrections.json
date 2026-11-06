@@ -1,0 +1,28 @@
+[
+  {
+    "airline": "UA",
+    "sourceRecord": "23742286",
+    "field": "directors",
+    "published": [
+      "Eric Stephenson"
+    ],
+    "corrected": [
+      "Tope Adebayo"
+    ],
+    "evidence": "Public reports of Inside Life (2022) credit Tope Adebayo as director; the airline's cast list matches that film.",
+    "checkedOn": "2026-11-04"
+  },
+  {
+    "airline": "UA",
+    "sourceRecord": "24111177",
+    "field": "directors",
+    "published": [
+      "Njo Kui Ying"
+    ],
+    "corrected": [
+      "Dong Zijian"
+    ],
+    "evidence": "Festival reviews of My Friend An Delie credit Dong Zijian as director; the airline repeated the director and cast of its neighbouring entry, Road to Vendetta.",
+    "checkedOn": "2026-11-05"
+  }
+]

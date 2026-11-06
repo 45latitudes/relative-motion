@@ -1,0 +1,6 @@
+[
+  { "publisher": "Q105584", "method": "Q108403393", "source": "rotten-tomatoes-tomatometer", "max": 100 },
+  { "publisher": "Q105584", "method": "Q108403540", "source": "rotten-tomatoes-average", "max": 10 },
+  { "publisher": "Q150248", "method": "Q106515043", "source": "metacritic-metascore", "max": 100 },
+  { "publisher": "Q37312", "method": "Q107218751", "source": "imdb-weighted-average", "max": 10 }
+]

@@ -1,0 +1,503 @@
+/* Core palette: four colours, strong contrast. The owner tunes these; the rest derives from them.
+   Night: behind the sky canvas. Paper: ticket stock, Pantone 11-4201 Cloud Dancer (2026).
+   Ink: print. Signal: the one accent, Pantone 19-4052 Classic Blue (2020). */
+:root {
+  --night: #17202b;
+  --paper: #f0eee9;
+  --ink: #1d1f24;
+  --signal: #0f4c81;
+  --cabin: #e2e0da;
+  /* Songti SC Black lacks many traditional characters, so titles use Bold (full coverage of both). */
+  --font-title: "Songti SC", "Songti TC", "Noto Serif CJK SC", "Source Han Serif SC", "Noto Serif SC", serif;
+  --title-weight: 700;
+  --font-latin: "Iowan Old Style", "Charter", "Palatino", Georgia, serif;
+  --font-data: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-text: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC", system-ui, sans-serif;
+}
+
+/* Derived tokens */
+:root {
+  color-scheme: dark;
+  --ink-soft: color-mix(in oklab, var(--ink) 68%, var(--paper));
+  --ink-faint: color-mix(in oklab, var(--ink) 45%, var(--paper));
+  --rule: color-mix(in oklab, var(--ink) 22%, var(--paper));
+  --night-soft: color-mix(in oklab, var(--paper) 62%, var(--night));
+  --night-faint: color-mix(in oklab, var(--paper) 36%, var(--night));
+  --mast: 27vh;
+  --filters-h: 8.6rem;
+  /* One printed millimetre. The ticket is drawn from the classic 200 × 83 mm stock: 150 mm main
+     part, 50 mm stub, plus the 1 mm on each side that the tear strip overlaps. 5 px is about real
+     size on a MacBook at its default scaling; smaller screens shrink it, never the proportions. */
+  --mm: min(5px, calc((52vw - 4.5vw - 2.5rem) / 151), calc((100vh - var(--mast) - 6rem) / 83));
+  --ticket-w: calc(151 * var(--mm));
+  --ticket-h: calc(83 * var(--mm));
+  --band-h: calc(8 * var(--mm));
+  /* Paper: fine grain plus a faint uneven mottle, the cloudy look of real stock against light. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --fibres: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.34 0 0 0 0 0.3 0 0 0 .13 -.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* Stock colour, a touch lighter at the top where the light falls. */
+  --stock: linear-gradient(172deg, color-mix(in oklab, var(--paper) 90%, #fff), var(--paper) 55%, color-mix(in oklab, var(--paper) 93%, #a59d90));
+  /* Edge of die-cut card: a bright cut line and a faint worn rim. */
+  --card-edge: inset 0 0 0 0.5px rgb(255 255 255 / 0.55), inset 0 0 1.6em rgb(96 90 80 / 0.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html.is-boarded, html.is-boarded body { height: 100%; overflow: hidden; }
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--paper);
+  font-family: var(--font-text);
+  line-height: 1.6;
+}
+a { color: inherit; text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
+a:hover { color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+button { font: inherit; color: inherit; }
+.status { max-width: 40rem; margin: 20vh auto; padding: 0 1rem; }
+.status h1 { font-family: var(--font-title); font-weight: var(--title-weight); }
+.hint { color: var(--night-soft); font-size: 0.85rem; }
+
+/* Opening: cabin wall and window. The window is a hole: its huge spread shadow is the wall. */
+.view { position: fixed; inset: 0; transform-origin: 50% 50%; }
+.cabin { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.porthole {
+  --bezel: 18px;
+  position: relative;
+  pointer-events: auto;
+  cursor: pointer;
+  box-shadow:
+    inset 0 0 0 calc(var(--bezel) * 0.35) rgb(0 0 0 / 0.18),
+    inset 0 calc(var(--bezel) * 0.6) calc(var(--bezel) * 1.6) rgb(0 0 0 / 0.35),
+    0 0 0 var(--bezel) color-mix(in oklab, var(--cabin) 88%, #fff),
+    0 0 0 calc(var(--bezel) + 1px) rgb(0 0 0 / 0.08),
+    0 calc(var(--bezel) * 0.5) calc(var(--bezel) * 2.4) calc(var(--bezel) + 2px) rgb(0 0 0 / 0.12),
+    0 0 0 300vmax var(--cabin);
+}
+.porthole-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(125deg, rgb(255 255 255 / 0.16) 0%, transparent 38%, transparent 70%, rgb(255 255 255 / 0.06) 100%);
+  pointer-events: none;
+}
+.cabin { padding-bottom: 16vh; }
+/* The title stands in front of the window, wider than it, in the accent blue. */
+.cabin-title {
+  position: fixed;
+  left: 50%;
+  top: 42vh;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-title);
+  font-weight: var(--title-weight);
+  font-size: clamp(4rem, 9.5vw, 10rem);
+  line-height: 1;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em;
+  white-space: nowrap;
+  color: var(--signal);
+  pointer-events: none;
+}
+.cabin-intro {
+  position: fixed;
+  left: 50%;
+  top: calc(63vh + 1.6rem);
+  transform: translateX(-50%);
+  width: min(36rem, calc(100vw - 2rem));
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.85;
+  text-align: justify;
+  pointer-events: none;
+}
+.cabin-intro p { margin: 0 0 0.5rem; }
+.cabin-intro .cabin-name { margin-bottom: 0.6rem; font-family: var(--font-title); font-weight: var(--title-weight); font-size: 1rem; letter-spacing: 0.2em; }
+.cabin-intro .cabin-name span { margin-left: 0.8rem; font-family: var(--font-latin); font-style: italic; font-weight: 400; letter-spacing: 0.02em; color: var(--ink-soft); }
+.cabin-hint { margin-top: 0.9rem !important; text-align: center; font-family: var(--font-data); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--ink-faint); }
+.cabin-track { pointer-events: none; }
+
+/* Cloud outside the closed window, between the catalogue and the cabin wall. */
+.clouds { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; }
+
+/* Board: the ticket's main part on the left, its tear near the middle; stubs drift on the right. */
+.board {
+  display: grid;
+  grid-template-columns: calc(4.5vw + var(--ticket-w) + 2.5rem) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--night);
+}
+/* Sky behind everything; the near sea of cloud sits in front of the stubs, behind the ticket. */
+.sky-back, .sky-front { position: absolute; left: 0; width: 100%; pointer-events: none; }
+.sky-back { top: 0; height: 100%; z-index: 0; }
+.sky-front { top: 0; height: 100%; z-index: 2; }
+.board-left {
+  position: relative;
+  display: grid;
+  grid-template-rows: var(--mast) auto minmax(0, 1fr) auto;
+  min-height: 0;
+  padding: 0 0 4vh 4.5vw;
+  z-index: 3;
+}
+.masthead { align-self: end; padding-bottom: 1.4rem; text-shadow: 0 1px 14px rgb(60 60 120 / 0.25); transition: opacity 0.35s ease, transform 0.45s ease; }
+.masthead h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-weight: var(--title-weight);
+  font-size: clamp(2.6rem, 4.4vw, 4.4rem);
+  line-height: 1;
+  letter-spacing: 0.12em;
+}
+.masthead h1 span {
+  display: inline-block;
+  margin-left: 1rem;
+  font-family: var(--font-latin);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  color: rgb(240 238 233 / 0.78);
+}
+.has-open .masthead { opacity: 0; transform: translateY(-1.2rem); pointer-events: none; }
+
+/* Filters sit on the ticket; when a film opens they rise above its top edge. */
+.filters {
+  position: absolute;
+  left: 4.5vw;
+  width: var(--ticket-w);
+  top: calc(var(--mast) + var(--band-h) + 1rem);
+  height: var(--filters-h);
+  padding: 0 calc(7 * var(--mm)) 0 calc(6 * var(--mm));
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  color: var(--ink);
+  z-index: 3;
+  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.4s ease;
+}
+.has-open .filters { transform: translateY(calc(-1 * (var(--filters-h) + var(--band-h) + 1.6rem))); color: var(--paper); }
+.field-label {
+  display: inline-block;
+  min-width: 5.2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.field-label span, .fields dt span {
+  margin-left: 0.35rem;
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.search { display: flex; align-items: center; }
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.95rem;
+  outline-offset: 2px;
+}
+.search input::placeholder { color: inherit; opacity: 0.45; }
+.filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.chip {
+  padding: 0.12rem 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.78rem;
+  cursor: pointer;
+  opacity: 0.72;
+}
+.chip small { margin-left: 0.3rem; font-family: var(--font-data); font-size: 0.7rem; opacity: 0.7; }
+.chip:hover { opacity: 1; }
+.chip[aria-pressed="true"] { opacity: 1; background: var(--signal); border-color: var(--signal); color: var(--paper); }
+
+/* Card stock. A crisp thin shadow gives the card its thickness, a soft one lifts it off the night. */
+.ticket-shadow, .stub {
+  filter: drop-shadow(0 0.6px 0 rgb(40 28 12 / 0.45)) drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.25)) drop-shadow(0 14px 22px rgb(0 0 0 / 0.32));
+}
+
+/* The main part of the ticket. Its right edge is the tear (see paper.ts). */
+.ticket-shadow { position: relative; width: var(--ticket-w); height: var(--ticket-h); }
+.ticket {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 calc(7 * var(--mm)) calc(4 * var(--mm)) calc(6 * var(--mm));
+  background: var(--fibre-main) right top / calc(2 * var(--mm)) 100% no-repeat, var(--grain), var(--fibres), var(--stock);
+  box-shadow: var(--card-edge);
+  color: var(--ink);
+  border-radius: calc(3 * var(--mm)) 0 0 calc(3 * var(--mm));
+  -webkit-mask: linear-gradient(#000 0 0) left top / calc(100% - 2 * var(--mm) + 1px) 100% no-repeat, var(--tear-main) right top / calc(2 * var(--mm)) 100% no-repeat;
+  mask: linear-gradient(#000 0 0) left top / calc(100% - 2 * var(--mm) + 1px) 100% no-repeat, var(--tear-main) right top / calc(2 * var(--mm)) 100% no-repeat;
+  overflow: hidden;
+}
+.ticket-band {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: none;
+  height: var(--band-h);
+  margin: 0 calc(-7 * var(--mm)) 0 calc(-6 * var(--mm));
+  padding: 0 calc(7 * var(--mm)) 0 calc(6 * var(--mm));
+  background: var(--signal);
+  color: var(--paper);
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+}
+.ticket-band [lang="en"] { font-family: var(--font-data); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.ticket-summary { flex: 1; display: flex; flex-direction: column; min-height: 0; margin-top: calc(var(--filters-h) + 1.4rem); border-top: 1px dashed var(--rule); padding-top: 0.9rem; }
+.ticket-hint { margin: 0.8rem 0 0; color: var(--ink-soft); font-size: 0.8rem; }
+.ticket-close {
+  padding: 0.15rem 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--paper);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+.ticket-close:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+
+.fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem 1rem; margin: 0; }
+.fields dt { font-size: 0.72rem; color: var(--ink-soft); }
+.fields dd { margin: 0.1rem 0 0; font-family: var(--font-data); font-size: 0.86rem; font-variant-numeric: tabular-nums; }
+
+/* Film particulars, written in once a stub is chosen. */
+.details {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 32%);
+  gap: 0 calc(6 * var(--mm));
+  padding-top: calc(4 * var(--mm));
+  animation: write-in 0.6s 0.2s both ease-out;
+}
+.details-main, .details-side { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.details-main.has-more, .details-side.has-more {
+  -webkit-mask: linear-gradient(to bottom, #000 calc(100% - 2.6em), transparent);
+  mask: linear-gradient(to bottom, #000 calc(100% - 2.6em), transparent);
+}
+.details-side { padding-left: calc(4 * var(--mm)); border-left: 1px dashed var(--rule); }
+@keyframes write-in { from { opacity: 0; transform: translateY(0.6rem); } }
+.details-title { margin: 0; font-family: var(--font-title); font-weight: var(--title-weight); font-size: 1.75rem; line-height: 1.15; letter-spacing: 0.04em; }
+.details-alt { margin: 0.25rem 0 0; color: var(--ink-soft); }
+.details-alt.latin { font-family: var(--font-latin); font-style: italic; font-size: 1rem; }
+.details-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: var(--ink-soft); }
+.details-main .fields { margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px dashed var(--rule); }
+.details-line { margin: 0.7rem 0 0; font-size: 0.82rem; color: var(--ink-soft); }
+.details-overview { margin: 0.7rem 0 0; font-size: 0.86rem; line-height: 1.7; }
+.details-overview p { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.details-overview.is-open p { white-space: normal; }
+.details-overview .credit, .details-line .credit { margin-left: 0.6rem; font-size: 0.7rem; color: var(--ink-faint); }
+.text-toggle { padding: 0; border: 0; background: none; font-size: 0.74rem; color: var(--signal); cursor: pointer; text-decoration: underline dotted; text-underline-offset: 0.3em; }
+.score-date { display: block; font-family: var(--font-text); font-size: 0.64rem; color: var(--ink-faint); }
+.scores { display: grid; gap: 0.5rem; margin: 0; }
+.scores dt { font-size: 0.7rem; color: var(--ink-soft); }
+.scores dd { margin: 0; font-family: var(--font-data); font-size: 1.1rem; line-height: 1.2; }
+.scores .scale { font-size: 0.72rem; color: var(--ink-faint); }
+.scores small { margin-left: 0.4rem; font-size: 0.66rem; color: var(--ink-faint); }
+/* Awards: a count that opens into a list, one award per line. */
+.awards { margin: 0.7rem 0 0; font-size: 0.82rem; color: var(--ink-soft); }
+.awards summary { cursor: pointer; }
+.awards summary::marker { color: var(--signal); }
+.awards ul { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.3rem; }
+.award { display: grid; grid-template-columns: 2.6rem 2.2rem minmax(0, 1fr); gap: 0.5rem; align-items: baseline; color: var(--ink); }
+.award-year { font-family: var(--font-data); font-size: 0.74rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+.award-kind { font-size: 0.7rem; color: var(--ink-faint); }
+.award.is-win .award-kind { color: var(--signal); }
+.award-who { display: block; font-size: 0.72rem; color: var(--ink-faint); }
+.awards .credit { margin: 0.5rem 0 0; font-size: 0.7rem; color: var(--ink-faint); }
+.carriers { list-style: none; margin: 0.9rem 0 0; padding: 0.7rem 0 0; border-top: 1px dashed var(--rule); font-size: 0.78rem; color: var(--ink-soft); }
+.carriers li + li { margin-top: 0.35rem; }
+.carrier-note { display: block; font-size: 0.7rem; color: var(--ink-faint); }
+.code {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0 0.3em;
+  border: 1px solid currentColor;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+}
+.film-links { display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; margin: 0.9rem 0 0.4rem; font-size: 0.8rem; }
+.film-links a { display: inline-flex; align-items: center; gap: 0.3rem; text-decoration: none; }
+.film-links a[data-kind="search"] { text-decoration: underline dotted; text-underline-offset: 0.3em; }
+.plane-icon { width: 0.95em; height: 0.95em; fill: var(--signal); transform: rotate(-35deg); }
+.poster { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; background: var(--rule); }
+
+/* Fine print under the ticket, on the night. */
+.fine-print { grid-row: 4; max-width: var(--ticket-w); font-size: 0.66rem; line-height: 1.6; color: rgb(244 236 220 / 0.78); text-shadow: 0 1px 6px rgb(40 30 50 / 0.55); }
+.fine-print p { margin: 0; }
+.fine-print a:hover { color: var(--paper); }
+.fine-print [lang="en"] { display: block; }
+
+/* Stubs: the 50 mm part of the torn ticket. Everything inside is in em (30 em = 83 mm), so a
+   stub scales whole; --u is one printed millimetre at the stub's own size. */
+.board-right { position: relative; min-width: 0; z-index: 1; }
+.wall-controls { position: absolute; top: 1.6rem; right: 2.4rem; z-index: 4; }
+
+/* iOS-style switch in the project's colours. */
+.switch { display: inline-flex; align-items: center; gap: 0.7rem; font-size: 0.8rem; color: var(--paper); cursor: pointer; }
+.switch-track {
+  position: relative;
+  width: 2.85rem;
+  height: 1.72rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.2);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+.switch-track[aria-checked="true"] { background: var(--signal); }
+.switch-knob {
+  position: absolute;
+  top: 0.12rem;
+  left: 0.12rem;
+  width: 1.48rem;
+  height: 1.48rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.15), 0 1px 1px rgb(0 0 0 / 0.16), 0 3px 1px rgb(0 0 0 / 0.1);
+  transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1), width 0.2s ease;
+}
+.switch-track:active .switch-knob { width: 1.8rem; }
+.switch-track[aria-checked="true"] .switch-knob { transform: translateX(1.13rem); }
+.switch-track[aria-checked="true"]:active .switch-knob { transform: translateX(0.81rem); }
+
+/* Tidy layout: flat rows in sort order. */
+.stub-grid {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, calc(var(--ticket-h) * 0.72 * 51 / 83));
+  justify-content: center;
+  align-content: start;
+  gap: 22px;
+  padding: 5.5rem 2.4rem 18vh;
+  font-size: calc(var(--ticket-h) * 0.72 / 30);
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+  -webkit-mask: linear-gradient(to bottom, transparent, #000 4.5rem);
+  mask: linear-gradient(to bottom, transparent, #000 4.5rem);
+  animation: settle 0.45s ease-out;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.stub-grid.is-paused { opacity: 0.32; filter: saturate(0.6); }
+.stub-grid .stub { filter: none; box-shadow: var(--card-edge), 0 0.6em 1.4em rgb(0 0 0 / 0.28); }
+.stub-grid .stub:hover, .stub-grid .stub:focus-visible { transform: translateY(-0.5em); }
+@keyframes settle { from { opacity: 0; transform: translateY(1rem); } }
+.wall-empty { margin: 40vh 0 0; text-align: center; color: var(--night-soft); }
+/* The tilted wall reaches past the left edge of its column (under the ticket), so the nearest
+   lane is never cut off by the column edge; position and perspective are offset to match. */
+.stub-wall {
+  --reach: 30vw;
+  position: absolute;
+  inset: 0 0 0 calc(-1 * var(--reach));
+  overflow: hidden;
+  perspective: 1300px;
+  perspective-origin: calc(var(--reach) + (100% - var(--reach)) / 2) 50%;
+  /* Wall stubs are printed at 72% of the joined size. */
+  font-size: calc(var(--ticket-h) * 0.72 / 30);
+  -webkit-mask: linear-gradient(to bottom, transparent, #000 14%);
+  mask: linear-gradient(to bottom, transparent, #000 14%);
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+.stub-wall.is-paused { opacity: 0.32; filter: saturate(0.6); }
+.stub-plane {
+  position: absolute;
+  left: calc(var(--reach) + (100% - var(--reach)) * 0.47);
+  top: 50%;
+  display: flex;
+  height: 150%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.stub-lane { position: relative; overflow: visible; transform-style: preserve-3d; }
+.stub-track { display: flex; flex-direction: column; will-change: transform; transform-style: preserve-3d; }
+.stub {
+  --u: calc(30em / 83);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: calc(51 * var(--u));
+  height: 30em;
+  padding: 1.5em 1.3em 1.3em calc(2 * var(--u) + 1.2em);
+  border: 0;
+  border-radius: 0 calc(3 * var(--u)) calc(3 * var(--u)) 0;
+  background: var(--fibre-stub) left top / calc(2 * var(--u)) 100% no-repeat, var(--grain), var(--fibres), var(--stock);
+  box-shadow: var(--card-edge);
+  color: var(--ink);
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-mask: linear-gradient(#000 0 0) right top / calc(100% - 2 * var(--u) + 1px) 100% no-repeat, var(--tear-stub) left top / calc(2 * var(--u)) 100% no-repeat;
+  mask: linear-gradient(#000 0 0) right top / calc(100% - 2 * var(--u) + 1px) 100% no-repeat, var(--tear-stub) left top / calc(2 * var(--u)) 100% no-repeat;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+/* In the tilted wall a drop-shadow per stub is costly; one soft shadow is enough. */
+.stub-lane .stub { filter: none; box-shadow: var(--card-edge), 0 0.6em 1.4em rgb(0 0 0 / 0.28); }
+.stub-lane .stub:hover, .stub-lane .stub:focus-visible { transform: translateZ(46px); }
+.stub.is-out { visibility: hidden; }
+.stub-codes { font-family: var(--font-data); font-size: 1.05em; letter-spacing: 0.12em; color: var(--signal); }
+.stub-body { position: relative; display: flex; flex-direction: column; flex: 1; min-height: 0; margin-top: 0.9em; }
+.stub-title {
+  font-family: var(--font-title);
+  font-weight: var(--title-weight);
+  font-size: 2.05em;
+  line-height: 1.18;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.stub-alt { margin-top: 0.6em; font-size: 1.15em; color: var(--ink-soft); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.stub-alt.latin { font-family: var(--font-latin); font-style: italic; font-size: 1.25em; }
+/* On the joined stub the poster is printed over the title block. */
+.stub-poster {
+  position: absolute;
+  inset: 0 0 0.9em;
+  display: flex;
+  justify-content: center;
+  background: var(--paper);
+  opacity: 0;
+  transition: opacity 0.5s 0.45s ease;
+}
+.stub-poster .poster { width: auto; height: 100%; max-width: 100%; box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.2); }
+.is-joined.is-joined:not(.is-leaving):not(.is-returning) .stub-poster { opacity: 1; }
+/* A poster that fails to load leaves the wrapper empty; then the title shows through. */
+.stub-poster:empty { display: none; }
+.stub-meta { padding-top: 0.8em; border-top: 1px dashed var(--rule); font-family: var(--font-data); font-size: 1.05em; color: var(--ink-soft); }
+.stub-score { margin-top: 0.4em; font-family: var(--font-data); font-size: 2.6em; line-height: 1; white-space: nowrap; }
+.stub-score.is-unconfirmed { font-family: var(--font-text); font-size: 1.25em; letter-spacing: 0.1em; color: var(--ink-faint); }
+/* A joined stub shows its whole title; the stub works out the size (StubFace). */
+.stub.is-joined .stub-body, .stub.m-flyer .stub-body { overflow: hidden; }
+.stub.is-joined .stub-title, .stub.m-flyer .stub-title { display: block; -webkit-line-clamp: unset; overflow: visible; overflow-wrap: anywhere; }
+.stub-score small { margin-left: 0.3em; font-size: 0.32em; letter-spacing: 0.1em; color: var(--ink-faint); }
+
+/* The chosen stub flying out of the wall to complete the ticket. */
+.stub.is-joined {
+  position: fixed;
+  z-index: 10;
+  margin: 0;
+  transform-origin: 0 0;
+  transition: transform 0.7s cubic-bezier(0.2, 0.75, 0.15, 1);
+}
+.stub.is-joined.is-leaving { transition: none; }

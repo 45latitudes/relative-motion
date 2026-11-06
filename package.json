@@ -1,0 +1,23 @@
+{
+  "name": "relative-motion",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": "26.x"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit && pnpm -C web typecheck",
+    "test": "pnpm typecheck && vitest run",
+    "award-labels": "node pipeline/scripts/award-labels.ts",
+    "export:catalog": "node pipeline/scripts/export-catalog.ts",
+    "collect": "node pipeline/scripts/collect-airlines.ts",
+    "match": "node --env-file=.env pipeline/scripts/match-catalog.ts",
+    "report:matching": "node pipeline/scripts/match-report.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.6",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}

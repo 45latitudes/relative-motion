@@ -1,0 +1,193 @@
+/* Upright layout for phones (see MobileCatalog). Shares tokens, paper and tear with the desktop
+   board; only the arrangement changes. */
+
+/* Cover on a narrow screen: the window is larger, the words below it smaller. */
+@media (max-width: 720px) {
+  .cabin-title { font-size: clamp(3.2rem, 16vw, 4.4rem); letter-spacing: 0.22em; text-indent: 0.22em; }
+  .cabin-intro { top: calc(63vh + 0.8rem); width: calc(100vw - 2.5rem); font-size: 0.8rem; line-height: 1.75; }
+  .cabin-intro .cabin-name { font-size: 0.9rem; }
+}
+
+.m-board {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--night);
+}
+/* Layers: sky, rings, the pass, the near cloud (which the pass rises through), then the slip. */
+.m-board .sky-front { z-index: 3; transition: transform 1.1s 0.5s ease, opacity 1.1s 0.5s ease; }
+.m-board.has-open .sky-front { transform: translateY(9vh); opacity: 0.55; }
+.m-head, .m-slip { transition: opacity 0.4s 0.6s ease, transform 0.4s 0.6s ease; }
+/* They leave at once when a film opens, and come back only after the pass has sunk. */
+.m-board.has-open .m-head, .m-board.has-open .m-slip { transition-delay: 0s; }
+.m-board.has-open .m-head, .m-board.has-open .m-slip { opacity: 0; transform: translateY(-0.6rem); pointer-events: none; }
+
+.m-head {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + 0.9rem) max(16px, env(safe-area-inset-right, 0px)) 0.6rem max(16px, env(safe-area-inset-left, 0px));
+  text-shadow: 0 1px 12px rgb(60 60 120 / 0.25);
+}
+.m-head h1 { margin: 0; font-family: var(--font-title); font-weight: var(--title-weight); font-size: 1.6rem; letter-spacing: 0.12em; line-height: 1; }
+.m-head h1 span { margin-left: 0.6rem; font-family: var(--font-latin); font-style: italic; font-weight: 400; font-size: 0.8rem; letter-spacing: 0.02em; color: rgb(240 238 233 / 0.78); }
+.m-head .switch { font-size: 0.75rem; }
+
+/* The slip: a strip of the same stock carrying search and filters; the chips wrap. */
+.m-slip {
+  position: relative;
+  z-index: 4;
+  margin: 0 max(16px, env(safe-area-inset-right, 0px)) 0.4rem max(16px, env(safe-area-inset-left, 0px));
+  padding: 0.6rem 0.8rem 0.5rem;
+  border-top: 0.35rem solid var(--signal);
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: var(--grain), var(--fibres), var(--stock);
+  box-shadow: var(--card-edge), 0 10px 22px rgb(0 0 0 / 0.25);
+  color: var(--ink);
+}
+.m-search {
+  width: 100%;
+  padding: 0.3rem 0;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+}
+.m-search::placeholder { color: inherit; opacity: 0.45; }
+.m-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin-top: 0.55rem; }
+.m-chips .chip { flex: none; }
+.m-chips-rule { flex: none; width: 1px; height: 1.1rem; margin: 0 0.15rem; background: var(--rule); }
+.m-note { margin: 0.4rem 0 0; font-size: 0.72rem; line-height: 1.5; color: var(--ink-soft); }
+.m-about { margin-top: 0.35rem; font-size: 0.68rem; color: var(--ink-soft); }
+.m-about summary { cursor: pointer; }
+.m-about p { margin: 0.3rem 0 0.2rem; line-height: 1.6; }
+.m-about [lang="en"] { display: block; }
+
+/* A stub on a phone lies landscape, 83 × 51 mm, torn along its lower edge. 30 em = 83 mm. */
+.m-board .stub {
+  --u: calc(30em / 83);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "codes score" "body score" "meta score";
+  column-gap: 1.2em;
+  width: 30em;
+  height: calc(51 * var(--u));
+  padding: calc(5 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u));
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
+  background: var(--grain), var(--fibres), var(--stock);
+  -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 2 * var(--u) + 1px) no-repeat, var(--tear-main-across) bottom / 100% calc(2 * var(--u)) no-repeat;
+  mask: linear-gradient(#000 0 0) top / 100% calc(100% - 2 * var(--u) + 1px) no-repeat, var(--tear-main-across) bottom / 100% calc(2 * var(--u)) no-repeat;
+}
+.m-board .stub .stub-codes { grid-area: codes; font-size: 1.45em; }
+.m-board .stub .stub-body { grid-area: body; margin-top: 0.5em; }
+.m-board .stub .stub-title { font-size: 2.2em; -webkit-line-clamp: 2; }
+.m-board .stub .stub-alt { margin-top: 0.35em; font-size: 1.5em; -webkit-line-clamp: 1; }
+.m-board .stub .stub-meta { grid-area: meta; font-size: 1.45em; }
+.m-board .stub .stub-score { grid-area: score; align-self: end; margin: 0; font-size: 3em; text-align: right; }
+.m-board .stub .stub-score.is-unconfirmed { font-size: 1.5em; }
+.m-board .stub .stub-score small { display: block; margin: 0.35em 0 0; font-size: 0.42em; }
+
+/* Four rings around a centre far below; positions are set per frame (StubRings). */
+.m-wall { position: relative; z-index: 1; flex: 1; min-height: 0; }
+.stub-rings { position: absolute; inset: 0; overflow: hidden; touch-action: pan-y; transition: opacity 0.5s ease, filter 0.5s ease; }
+.stub-rings.is-paused { opacity: 0.32; filter: saturate(0.6); }
+.stub-rings .stub {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 50% 50%;
+  transition: none;
+  will-change: transform;
+  filter: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Tidy: two columns in sort order, the same stub size as on the rings (16px gutters, 12px gap). */
+.m-wall .stub-grid {
+  grid-template-columns: repeat(2, 30em);
+  gap: 12px;
+  padding: 0.6rem 16px 20vh;
+  font-size: calc((100vw - 44px) / 2 / 30);
+}
+
+/* The upright pass: stub on top, the body below the tear. --u fits 83 × 202 mm to the screen. */
+.m-pass-layer {
+  --u: min(calc((100vw - 32px) / 83), calc((100dvh - 40px) / 202));
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+  background: rgb(30 34 60 / 0.3);
+  transition: background 0.4s ease;
+}
+.m-pass-layer.is-returning { background: rgb(30 34 60 / 0); pointer-events: none; transition-duration: 0.7s; }
+.m-pass { display: flex; flex-direction: column; width: calc(83 * var(--u)); }
+.m-slot { height: calc(51 * var(--u)); }
+.m-body {
+  display: flex;
+  flex-direction: column;
+  height: calc(151 * var(--u));
+  margin-top: calc(-2 * var(--u));
+  padding: calc(2 * var(--u)) calc(5 * var(--u)) calc(5 * var(--u));
+  border-radius: 0 0 calc(3 * var(--u)) calc(3 * var(--u));
+  background: var(--grain), var(--fibres), var(--stock);
+  box-shadow: var(--card-edge);
+  color: var(--ink);
+  filter: drop-shadow(0 14px 22px rgb(0 0 0 / 0.3));
+  -webkit-mask: linear-gradient(#000 0 0) bottom / 100% calc(100% - 2 * var(--u) + 1px) no-repeat, var(--tear-stub-across) top / 100% calc(2 * var(--u)) no-repeat;
+  mask: linear-gradient(#000 0 0) bottom / 100% calc(100% - 2 * var(--u) + 1px) no-repeat, var(--tear-stub-across) top / 100% calc(2 * var(--u)) no-repeat;
+}
+.m-pass-layer.is-measuring .m-body, .m-pass-layer.is-leaving .m-body { visibility: hidden; }
+/* The body comes up out of the cloud and goes back down into it. It only moves, never stretches.
+   Rising follows the iOS sheet curve; sinking first lifts a few pixels, as if let go, then
+   gathers speed smoothly on the way down, like a message sliding away in iMessage. */
+.m-pass-layer.is-joined .m-body { animation: body-rise 0.85s 0.12s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.m-pass-layer.is-returning .m-body { animation: body-sink 0.9s both; }
+@keyframes body-rise { from { transform: translateY(100dvh); } }
+@keyframes body-sink {
+  0% { transform: translateY(0); animation-timing-function: cubic-bezier(0.33, 0, 0.67, 1); }
+  16% { transform: translateY(-12px); animation-timing-function: cubic-bezier(0.55, 0, 0.8, 0.45); }
+  100% { transform: translateY(100dvh); }
+}
+.m-body .ticket-band { flex: none; margin: 0 calc(-5 * var(--u)); padding: 0 calc(5 * var(--u)); height: calc(10 * var(--u)); }
+/* One column, one scroll on a phone. */
+.m-body .details { display: block; overflow-y: auto; overscroll-behavior: contain; padding-top: calc(4 * var(--u)); }
+.m-body .details-main, .m-body .details-side { overflow: visible; -webkit-mask: none; mask: none; }
+.m-body .details-side { margin-top: 0.9rem; padding: 0.8rem 0 0; border-left: 0; border-top: 1px dashed var(--rule); }
+.m-body .details-title { font-size: 1.45rem; }
+.m-body .fields, .m-body .scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* The stub in flight: from its ring, straightened and enlarged into the top of the pass. */
+.stub.m-flyer {
+  position: fixed;
+  z-index: 2;
+  margin: 0;
+  transform-origin: 50% 50%;
+  transition: transform 0.75s cubic-bezier(0.2, 0.75, 0.15, 1);
+  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.28));
+}
+.stub.m-flyer.is-leaving { transition: none; }
+/* Going home, the stub waits for the body to clear the tear before it leaves. */
+.stub.m-flyer.is-returning { transition: transform 0.75s 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+/* Once at the top, the poster is printed where the score was. */
+.m-board .m-flyer .stub-body { position: static; }
+.m-board .m-flyer .stub-poster {
+  position: absolute;
+  inset: calc(5 * var(--u)) calc(6 * var(--u)) calc(7 * var(--u)) auto;
+  width: auto;
+  background: none;
+  transition: opacity 0.4s 0.6s ease;
+}
+.m-board .m-flyer .stub-poster .poster { height: 100%; width: auto; }
+/* Text keeps to the left of the poster (2:3 at the stub's inner height, about 26 mm wide). */
+.m-board .m-flyer:has(.stub-poster:not(:empty)) :is(.stub-codes, .stub-body, .stub-meta) { margin-right: calc(28 * var(--u)); }
+.m-board .m-flyer:has(.stub-poster:not(:empty)) .stub-score { display: none; }

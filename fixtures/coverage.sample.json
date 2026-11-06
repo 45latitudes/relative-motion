@@ -1,0 +1,5 @@
+{
+  "sample": {"id":"synthetic-1","title":"Paper Horizon","aliases":["纸上地平线"],"year":2001,"runtime":100,"directors":["Ari Example"],"tags":["自造"],"airline":"ZZ","source":"synthetic.json","sourceSha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","sourceRecord":"0","observedAt":"2026-08-20","editionNote":"Synthetic edition. 自造版本。"},
+  "movie": {"id":900001,"title":"Paper Horizon","original_title":"Paper Horizon","release_date":"2001-01-01","runtime":102,"credits":{"crew":[{"job":"Director","name":"Ari Example"}],"cast":[{"name":"Casey Example"}]},"translations":{"translations":[{"iso_639_1":"en","data":{"title":"Paper Horizon"}},{"iso_639_1":"zh","data":{"title":"纸上地平线"}}]},"genres":[{"name":"Drama"}],"overview":"An invented story. 自造故事。","vote_average":7,"vote_count":3,"poster_path":"/synthetic.jpg","videos":{"results":[{"type":"Trailer","site":"YouTube","key":"synthetic"}]}},
+  "ratings":"tconst\taverageRating\tnumVotes\r\ntt9000001\t7.1\t10\r\ntt9000002\t8.2\t20\r\ntt9000003\t7.3\t30\r\ntt9000003\t7.4\t31\r\ntt9000004\t11\t1\r\ntt9000005\t\\N\t2\r\n"
+}

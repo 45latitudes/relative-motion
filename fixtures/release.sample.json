@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 2,
+  "issue": "2026-10-30",
+  "airlines": [
+    { "code": "A1", "name": "Synthetic Air One" },
+    { "code": "A2", "name": "Synthetic Air Two" },
+    { "code": "A3", "name": "Synthetic Air Three" }
+  ],
+  "films": [
+    {
+      "id": "film-0001",
+      "title": "纸上地平线",
+      "match": { "status": "confirmed" },
+      "externalIds": {
+        "tmdbId": 900001,
+        "imdbId": "tt9000001",
+        "wikidataId": "Q900000001",
+        "doubanId": "900000001",
+        "rottenTomatoesId": "m/the_paper_horizon",
+        "metacriticId": "movie/the-paper-horizon",
+        "letterboxdId": "the-paper-horizon"
+      },
+      "originalTitle": "The Paper Horizon",
+      "englishTitle": "The Paper Horizon",
+      "year": 2001,
+      "runtime": 104,
+      "directors": ["Ada Placeholder"],
+      "cast": ["Bea Example", "Cyril Sample"],
+      "genres": ["剧情", "冒险"],
+      "originalLanguage": "en",
+      "posterPath": "/syntheticPaperHorizon.jpg",
+      "overview": { "text": "一位测绘员在纸上画出一条并不存在的地平线。", "language": "zh-CN" },
+      "trailerUrl": "https://www.youtube.com/watch?v=synthetic01",
+      "awards": { "wins": 2, "nominations": 5, "fetchedAt": "2026-10-29T08:00:00Z" }
+    },
+    {
+      "id": "film-0002",
+      "title": "纸上地平线",
+      "match": { "status": "confirmed" },
+      "externalIds": { "tmdbId": 900002, "wikidataId": "Q900000002" },
+      "originalTitle": "The Paper Horizon",
+      "year": 2021
+    },
+    {
+      "id": "film-0003",
+      "title": "Lanterns at Noon",
+      "match": { "status": "unconfirmed", "reason": "候选接近" },
+      "externalIds": {}
+    },
+    {
+      "id": "film-0004",
+      "title": "A Window Without a Map",
+      "match": { "status": "unconfirmed", "reason": "未召回候选" },
+      "externalIds": {}
+    }
+  ],
+  "listings": [
+    { "airlineCode": "A1", "filmId": "film-0001", "observedAt": "2026-10-29", "nativeNew": true, "rawTitle": "The Paper Horizon (2001)", "catalogMonth": "2026-10" },
+    { "airlineCode": "A2", "filmId": "film-0001", "observedAt": "2026-10-29", "nativeNew": false, "rawTitle": "纸上地平线" },
+    { "airlineCode": "A1", "filmId": "film-0002", "observedAt": "2026-10-29", "nativeNew": false, "rawTitle": "The Paper Horizon (2021)" },
+    { "airlineCode": "A2", "filmId": "film-0003", "observedAt": "2026-10-29", "nativeNew": null, "rawTitle": "Lanterns at Noon" },
+    { "airlineCode": "A1", "filmId": "film-0004", "observedAt": "2026-10-29", "nativeNew": null, "rawTitle": "A Window Without a Map", "year": 1999, "runtime": 97, "directors": ["Dora Fictional"], "audioLanguages": ["English"] },
+    { "airlineCode": "A3", "filmId": "film-0002", "observedAt": "2026-09-29", "nativeNew": true, "rawTitle": "The Paper Horizon" }
+  ],
+  "ratings": [
+    {
+      "filmId": "film-0001",
+      "source": "tmdb",
+      "via": "tmdb",
+      "value": 7.5,
+      "scale": { "min": 0, "max": 10 },
+      "votes": 120,
+      "fetchedAt": "2026-10-29T08:00:00Z"
+    },
+    {
+      "filmId": "film-0001",
+      "source": "synthetic-hundred-point-review",
+      "via": "wikidata",
+      "value": 82,
+      "scale": { "min": 0, "max": 100 },
+      "ratedOn": "2026-09-01",
+      "fetchedAt": "2026-10-29T16:00:00+08:00"
+    }
+  ],
+  "collections": [
+    { "airlineCode": "A1", "status": "success" },
+    { "airlineCode": "A2", "status": "partial" },
+    { "airlineCode": "A3", "status": "failed" }
+  ]
+}

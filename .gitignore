@@ -1,0 +1,9 @@
+.env
+local/
+node_modules/
+dist/
+.DS_Store
+# The catalogue snapshot carries TMDb data and is uploaded to the `catalog-snapshot` release, not committed.
+web/public/data/
+# The film-ID registry is kept by the maintainer.
+data/film-ids.json

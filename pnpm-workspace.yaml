@@ -1,0 +1,9 @@
+packages:
+  - pipeline
+  - web
+  - shared
+
+engineStrict: true
+
+patchedDependencies:
+  opencc-js@1.4.2: patches/opencc-js@1.4.2.patch
