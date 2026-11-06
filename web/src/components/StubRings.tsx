@@ -3,7 +3,7 @@ import type { SortKey } from '../catalog/controller.ts';
 import type { FilmView } from '../catalog/view.ts';
 import { StubFace } from './Stub.tsx';
 
-// Four rings of stubs, like four dials or growth rings, around one centre far below the screen,
+// Three or four rings of stubs, like dials or growth rings, around one centre far below the screen,
 // so neighbouring stubs lean only a few degrees apart. The rings turn slowly against each other;
 // a finger dragged sideways turns the ring under it. Stubs lie landscape with the tear below.
 interface Props {
@@ -17,55 +17,68 @@ export interface RingPlacement { x: number; y: number; angle: number; width: num
 // Where each stub element currently sits on screen, for the flight out of the ring.
 export const placements = new WeakMap<HTMLElement, RingPlacement>();
 
-const ringCount = 4;
+const maxRings = 4;
 const gapX = 10; // px between neighbouring stubs along a ring
+const top = 12; // px above the outer ring
+const minGap = 14;
+const maxGap = 34; // px between rings
 const drift = 0.11; // stubs per second
 
-interface Geometry { width: number; height: number; stubW: number; stubH: number; outer: number; centreY: number; pitch: number; slots: number }
+interface Geometry { width: number; height: number; rows: number; stubW: number; stubH: number; outer: number; centreY: number; pitch: number; slots: number }
 
 // Stubs on the rings are the size of the tidy layout's two columns, so switching between the
-// two keeps every stub the same size. The four rows spread out over the height with room to
-// spare below, rather than packing down into the cloud.
+// two keeps every stub the same size.
 export const columnWidth = (width: number) => (width - 16 * 2 - 12) / 2;
 
-function geometry(width: number, height: number): Geometry {
-  const stubW = columnWidth(width);
-  const stubH = (stubW * 51) / 83;
-  const rowGap = Math.max(14, Math.min(34, (height * 0.8 - stubH * ringCount) / (ringCount - 1)));
+// As many rings as the wall has room for, four or three: the room is the wall's height less the
+// cloud along the foot of the screen, which the last ring may dip into by an eighth of a stub,
+// and less the curve's drop at the screen edges. If even three do not fit, the stubs shrink.
+export function geometry(width: number, height: number, viewport = height): Geometry {
   const outer = Math.max(1500, width * 4.5);
-  const centreY = stubH / 2 + 12 + outer;
+  const sag = outer - Math.sqrt(outer * outer - (width / 2) ** 2);
+  let stubW = columnWidth(width);
+  let stubH = (stubW * 51) / 83;
+  const room = () => height - top - sag - viewport * 0.11 + stubH * 0.12;
+  const fits = (rows: number) => rows * stubH + (rows - 1) * minGap <= room();
+  const rows = fits(maxRings) ? maxRings : 3;
+  if (!fits(rows)) {
+    const scale = Math.max(0.6, (height - top - sag - viewport * 0.11 - (rows - 1) * minGap) / (stubH * (rows - 0.12)));
+    stubW *= scale;
+    stubH *= scale;
+  }
+  const rowGap = Math.max(minGap, Math.min(maxGap, (room() - rows * stubH) / (rows - 1)));
+  const centreY = stubH / 2 + top + outer;
   const slots = Math.ceil(width / (stubW + gapX)) + 4;
-  return { width, height, stubW, stubH, outer, centreY, pitch: stubH + rowGap, slots };
+  return { width, height, rows, stubW, stubH, outer, centreY, pitch: stubH + rowGap, slots };
 }
 
 export function StubRings({ films, sort, openKey, onPick }: Props) {
-  const rings = useMemo(() => {
-    const result: FilmView[][] = Array.from({ length: ringCount }, () => []);
-    films.forEach((film, index) => result[index % ringCount].push(film));
-    return result.filter((ring) => ring.length > 0);
-  }, [films]);
-
   const rootRef = useRef<HTMLDivElement>(null);
   const [geo, setGeo] = useState<Geometry>(() => geometry(390, 600));
+  const rings = useMemo(() => {
+    const result: FilmView[][] = Array.from({ length: geo.rows }, () => []);
+    films.forEach((film, index) => result[index % geo.rows].push(film));
+    return result.filter((ring) => ring.length > 0);
+  }, [films, geo.rows]);
   const geoRef = useRef(geo);
   geoRef.current = geo;
   // Ring positions in stubs; the first slot shown in each ring (committed to the DOM).
-  const positions = useRef<number[]>(Array.from({ length: ringCount }, (_, i) => i * 0.37));
+  const positions = useRef<number[]>(Array.from({ length: maxRings }, (_, i) => i * 0.37));
   const [bases, setBases] = useState<number[]>(() => positions.current.map((p) => Math.floor(p) - 2));
   const basesRef = useRef(bases);
   basesRef.current = bases;
   // The stub elements on each ring by their place along it, so a stub keeps its element (and
   // its film) as the window of shown places moves on.
-  const elements = useRef<Map<number, HTMLButtonElement>[]>(Array.from({ length: ringCount }, () => new Map()));
+  const elements = useRef<Map<number, HTMLButtonElement>[]>(Array.from({ length: maxRings }, () => new Map()));
   const drag = useRef<{ ring: number; x: number; last: number; t: number; v: number; moved: number } | undefined>(undefined);
-  const velocity = useRef<number[]>(Array.from({ length: ringCount }, () => 0));
+  const velocity = useRef<number[]>(Array.from({ length: maxRings }, () => 0));
   const paused = useRef(false);
   paused.current = openKey !== undefined;
 
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const observer = new ResizeObserver(([entry]) => setGeo(geometry(entry.contentRect.width || 390, entry.contentRect.height || 600)));
+    const observer = new ResizeObserver(([entry]) => setGeo(geometry(entry.contentRect.width || 390, entry.contentRect.height || 600, window.innerHeight)));
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
