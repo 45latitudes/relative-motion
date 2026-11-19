@@ -10,7 +10,7 @@ import { StubRings } from './components/StubRings.tsx';
 import { Switch } from './components/Switch.tsx';
 
 // The upright layout for phones. The same catalogue and the same paper, rearranged for a narrow
-// screen: a slip with search and filters at the top, four rings of landscape stubs turning
+// screen: a slip with search and filters at the top, three or four rings of landscape stubs turning
 // against each other below, and a boarding pass held upright when a film is opened.
 export function MobileCatalog({ release }: { release: Release }) {
   const catalog = useCatalogController(release);

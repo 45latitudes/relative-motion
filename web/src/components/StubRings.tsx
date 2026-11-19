@@ -78,7 +78,7 @@ export function StubRings({ films, sort, openKey, onPick }: Props) {
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const observer = new ResizeObserver(([entry]) => setGeo(geometry(entry.contentRect.width || 390, entry.contentRect.height || 600, window.innerHeight)));
+    const observer = new ResizeObserver(([entry]) => setGeo(geometry(entry.contentRect.width || 390, entry.contentRect.height || 600, root.closest<HTMLElement>('.m-board')?.clientHeight || window.innerHeight)));
     observer.observe(root);
     return () => observer.disconnect();
   }, []);

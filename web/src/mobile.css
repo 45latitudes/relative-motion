@@ -12,7 +12,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  /* Fills the fixed full-window view, so it follows the window whenever a browser's toolbar comes
+     or goes (WeChat slides one up after loading without always updating viewport units). */
+  height: 100%;
+  container-type: size;
   overflow: hidden;
   background: var(--night);
 }
@@ -128,6 +131,10 @@
   padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
   background: rgb(30 34 60 / 0.3);
   transition: background 0.4s ease;
+}
+@supports (height: 1cqh) {
+  /* Sized from the board itself rather than the viewport, for the same reason as the board. */
+  .m-pass-layer { --u: min(calc((100cqw - 32px) / 83), calc((100cqh - 40px) / 202)); }
 }
 .m-pass-layer.is-returning { background: rgb(30 34 60 / 0); pointer-events: none; transition-duration: 0.7s; }
 .m-pass { display: flex; flex-direction: column; width: calc(83 * var(--u)); }
